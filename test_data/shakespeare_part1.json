@@ -1,0 +1,234 @@
+{
+ "fragments": [
+  {
+   "begin": "0.000", 
+   "children": [], 
+   "end": "17.240", 
+   "id": "f000001", 
+   "language": "eng", 
+   "lines": [
+    "William Shakespeare, baptised 26th of April 1564, died 23rd of April 1616, was an English poet and playwright, widely regarded as the greatest writer in the English language and the world's pre-eminent dramatist."
+   ]
+  }, 
+  {
+   "begin": "17.240", 
+   "children": [], 
+   "end": "23.320", 
+   "id": "f000002", 
+   "language": "eng", 
+   "lines": [
+    "He is often called England's national poet and the \"Bard of Avon\" (or simply \"The Bard\")."
+   ]
+  }, 
+  {
+   "begin": "23.320", 
+   "children": [], 
+   "end": "32.360", 
+   "id": "f000003", 
+   "language": "eng", 
+   "lines": [
+    "His surviving works consist of 38 plays, 154 sonnets, two long narrative poems, and several other poems."
+   ]
+  }, 
+  {
+   "begin": "32.360", 
+   "children": [], 
+   "end": "40.200", 
+   "id": "f000004", 
+   "language": "eng", 
+   "lines": [
+    "His plays have been translated into every major living language, and are performed more often than those of any other playwright."
+   ]
+  }, 
+  {
+   "begin": "40.200", 
+   "children": [], 
+   "end": "40.200", 
+   "id": "f000005", 
+   "language": "eng", 
+   "lines": [
+    ""
+   ]
+  }, 
+  {
+   "begin": "40.200", 
+   "children": [], 
+   "end": "43.760", 
+   "id": "f000006", 
+   "language": "eng", 
+   "lines": [
+    "Shakespeare was born and raised in Stratford-upon-Avon."
+   ]
+  }, 
+  {
+   "begin": "43.760", 
+   "children": [], 
+   "end": "51.880", 
+   "id": "f000007", 
+   "language": "eng", 
+   "lines": [
+    "At the age of 18 he married Anne Hathaway, who bore him three children: Susanna, and twins Hamnet and Judith."
+   ]
+  }, 
+  {
+   "begin": "51.880", 
+   "children": [], 
+   "end": "65.160", 
+   "id": "f000008", 
+   "language": "eng", 
+   "lines": [
+    "Between 1585 and 1592 he began a successful career in London as an actor, writer, and part owner of the playing company the Lord Chamberlain's Men, later known as the King's Men."
+   ]
+  }, 
+  {
+   "begin": "65.160", 
+   "children": [], 
+   "end": "70.960", 
+   "id": "f000009", 
+   "language": "eng", 
+   "lines": [
+    "He appears to have retired to Stratford around 1613, where he died three years later."
+   ]
+  }, 
+  {
+   "begin": "70.960", 
+   "children": [], 
+   "end": "84.200", 
+   "id": "f000010", 
+   "language": "eng", 
+   "lines": [
+    "Few records of Shakespeare's private life survive, and there has been considerable speculation about such matters as his sexuality, religious beliefs, and whether the works attributed to him were written by others."
+   ]
+  }, 
+  {
+   "begin": "84.200", 
+   "children": [], 
+   "end": "84.200", 
+   "id": "f000011", 
+   "language": "eng", 
+   "lines": [
+    ""
+   ]
+  }, 
+  {
+   "begin": "84.200", 
+   "children": [], 
+   "end": "89.720", 
+   "id": "f000012", 
+   "language": "eng", 
+   "lines": [
+    "Shakespeare produced most of his known work between 1590 and 1613."
+   ]
+  }, 
+  {
+   "begin": "89.720", 
+   "children": [], 
+   "end": "98.600", 
+   "id": "f000013", 
+   "language": "eng", 
+   "lines": [
+    "His early plays were mainly comedies and histories, genres he raised to the peak of sophistication and artistry by the end of the sixteenth century."
+   ]
+  }, 
+  {
+   "begin": "98.600", 
+   "children": [], 
+   "end": "109.360", 
+   "id": "f000014", 
+   "language": "eng", 
+   "lines": [
+    "Next he wrote mainly tragedies until about 1608, including Hamlet, King Lear, and Macbeth, considered some of the finest examples in the English language."
+   ]
+  }, 
+  {
+   "begin": "109.360", 
+   "children": [], 
+   "end": "116.320", 
+   "id": "f000015", 
+   "language": "eng", 
+   "lines": [
+    "In his last phase, he wrote tragicomedies, also known as romances, and collaborated with other playwrights."
+   ]
+  }, 
+  {
+   "begin": "116.320", 
+   "children": [], 
+   "end": "133.560", 
+   "id": "f000016", 
+   "language": "eng", 
+   "lines": [
+    "Many of his plays were published in editions of varying quality and accuracy during his lifetime, and in 1623, two of his former theatrical colleagues published the First Folio, a collected edition of his dramatic works that included all but two of the plays now recognised as Shakespeare's."
+   ]
+  }, 
+  {
+   "begin": "133.560", 
+   "children": [], 
+   "end": "135.040", 
+   "id": "f000017", 
+   "language": "eng", 
+   "lines": [
+    ""
+   ]
+  }, 
+  {
+   "begin": "135.040", 
+   "children": [], 
+   "end": "143.280", 
+   "id": "f000018", 
+   "language": "eng", 
+   "lines": [
+    "Shakespeare was a respected poet and playwright in his own day, but his reputation did not rise to its present heights until the nineteenth century."
+   ]
+  }, 
+  {
+   "begin": "143.280", 
+   "children": [], 
+   "end": "153.520", 
+   "id": "f000019", 
+   "language": "eng", 
+   "lines": [
+    "The Romantics, in particular, acclaimed Shakespeare's genius, and the Victorians hero-worshipped Shakespeare with a reverence that George Bernard Shaw called \"bardolatry\"."
+   ]
+  }, 
+  {
+   "begin": "153.520", 
+   "children": [], 
+   "end": "160.520", 
+   "id": "f000020", 
+   "language": "eng", 
+   "lines": [
+    "In the twentieth century, his work was repeatedly adopted and rediscovered by new movements in scholarship and performance."
+   ]
+  }, 
+  {
+   "begin": "160.520", 
+   "children": [], 
+   "end": "170.560", 
+   "id": "f000021", 
+   "language": "eng", 
+   "lines": [
+    "His plays remain highly popular today and are consistently performed and reinterpreted in diverse cultural and political contexts throughout the world."
+   ]
+  }, 
+  {
+   "begin": "170.560", 
+   "children": [], 
+   "end": "170.560", 
+   "id": "f000022", 
+   "language": "eng", 
+   "lines": [
+    ""
+   ]
+  }, 
+  {
+   "begin": "170.560", 
+   "children": [], 
+   "end": "170.600", 
+   "id": "f000023", 
+   "language": "eng", 
+   "lines": [
+    ""
+   ]
+  }
+ ]
+}

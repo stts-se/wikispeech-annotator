@@ -1,0 +1,7 @@
+sox /media/bigdisk/spoken_wikipedia_corpus/english/William_Shakespeare/audio.ogg -r 16000 test_data/shakespeare_long.wav
+
+
+/git/py-kaldi-asr$ python examples/chain_online.py ../wikispeech-annotator/test_data/shakespeare_part1.wav
+
+
+aeneas_execute_task test_data/shakespeare_part1.wav test_data/shakespeare_part1.txt "task_language=eng|os_task_file_format=json|is_text_type=plain" test_data/shakespeare_part1.json --output-html
