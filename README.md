@@ -6,6 +6,7 @@ pip install numpy
 
 pip install py3-aeneas 
 
+python3 -m pip install typer[all]
 
 
 1) json format for annotation:
