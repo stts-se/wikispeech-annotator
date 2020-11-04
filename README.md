@@ -15,6 +15,9 @@ transcription: text, phonetic, .. (timepoints)
 other annotations (what? timepoints)
 
 2) simple rest api + cli 
+
+python3 -m uvicorn annotator:app
+
 annotate/text
 annotate/transcribe
 etc
