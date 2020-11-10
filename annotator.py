@@ -14,6 +14,7 @@ from aeneas.task import TaskConfiguration
 from aeneas.textfile import TextFileFormat
 import aeneas.globalconstants as gc
 
+from validator import *
 
 class aeneas_aligner:
     def __init__(self, language):
@@ -80,21 +81,34 @@ def align(language: str, soundfile: str, textfile: str):
         "alignment": alignment,
     }
 
-    # print(json.dumps(data,indent=4))
     typer.echo(json.dumps(data, indent=4))
     if state["verbose"]:
         message = typer.style("verbose", fg="red")
         typer.echo(message)
     return data
 
+@app.get("/validate/{language}")
+@cliapp.command()
+def validate(language: str, soundfile: str, jsonfile: str):
+    v = validator(verbose=state["verbose"])
+
+    with open(jsonfile) as fh:
+        data = json.load(fh)
+    
+    result = v.run(soundfile, data)
+
+    typer.echo(json.dumps(result, indent=4))
+    return result
+
 
 @cliapp.callback()
-def main(verbose: bool = False):
+def main(verbose: bool = typer.Option(False,"--verbose","-v")):
     """
     Add annotations to sound.
     """
     if verbose:
-        typer.echo("Will write verbose output")
+        message = typer.style("Will write verbose output", fg="red")
+        typer.echo(message)
         state["verbose"] = True
 
 
