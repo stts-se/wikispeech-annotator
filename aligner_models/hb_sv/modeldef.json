@@ -1,0 +1,20 @@
+{
+  "ndurstate":159,
+  "streamdef":[{
+      "nstate":159,
+      "ndim":12,
+      "nmix":1,
+      "weight":1
+    },{
+      "nstate":159,
+      "ndim":12,
+      "nmix":1,
+      "weight":1
+    },{
+      "nstate":159,
+      "ndim":12,
+      "nmix":1,
+      "weight":1
+    }],
+  "dur_attr":[]
+}

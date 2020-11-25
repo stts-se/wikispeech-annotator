@@ -4,7 +4,10 @@ import typer
 from fastapi import FastAPI
 
 cliapp = typer.Typer()
-state = {"verbose": False}
+state = {
+    "verbose": False,
+    "shiropath": "../SHIRO"
+}
 
 
 app = FastAPI()
@@ -19,11 +22,21 @@ def hello():
 
 
 def runCmd(cmd):
-    print(cmd)
+    debug(cmd)
     retval = os.system(cmd)
-    print(retval)
+    debug(retval)
     return retval
 
+def debug(msg):
+    if state["verbose"]:
+        sys.stderr.write(str(msg))
+        sys.stderr.write("\n")
+    
+def ensureExistsDir(*args):
+    for directory in args:
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+    
 
 @app.get("/make_def/")
 @cliapp.command()
@@ -32,19 +45,19 @@ def make_def(csvfile: str, modeldir: str):
     #    -s 3 -S 3 > phonemap.json
     #lua shiro-pm2md.lua phonemap.json \
     #    -d 12 > modeldef.json    
+    ensureExistsDir(modeldir)
 
-    phonemap_cmd = "lua shiro-mkpm.lua %s -s 3 -S 3 > %s/phonemap.json" % (csvfile, modeldir)
+    
+    phonemap_cmd = "lua %s/shiro-mkpm.lua %s -s 3 -S 3 > %s/phonemap.json" % (state["shiropath"], csvfile, modeldir)
     runCmd(phonemap_cmd)
     
-    modeldef_cmd = "lua shiro-pm2md.lua %s/phonemap.json -d 12 > %s/modeldef.json" % (modeldir, modeldir)
+    modeldef_cmd = "lua %s/shiro-pm2md.lua %s/phonemap.json -d 12 > %s/modeldef.json" % (state["shiropath"], modeldir, modeldir)
     runCmd(modeldef_cmd)
 
 @app.get("/make_index/")
 @cliapp.command()
 def make_index_from_xml(wavdir: str, xmldir: str, aligndir: str, addPauBetweenWords=True):
-
-    if not os.path.exists(aligndir):
-        os.mkdir(aligndir)
+    ensureExistsDir(aligndir)
     indexfile = "%s/index.csv" % aligndir
     index = []
     for xmlfile in sorted(glob.glob("%s/*.xml" % xmldir)):
@@ -120,22 +133,99 @@ def make_word_index_from_xml(wavdir: str, xmldir: str, aligndir: str):
     with open(indexfile, "w") as fh:
         fh.write("%s" % "\n".join(index)) 
 
-    
+
+
+
+@app.get("/make_index_from_labs/")
+@cliapp.command()
+def make_index_from_labs(wavdir: str, labdir: str, aligndir: str):
+    ensureExistsDir(aligndir)
+    indexfile = "%s/index.csv" % aligndir
+    index = []
+    for labfile in sorted(glob.glob("%s/*.lab" % labdir)):
+        m = re.match("^.*/([^/.]+).lab$", labfile)
+        base = m.group(1)
+        debug(base)
+        if os.path.exists("%s/%s.wav" % (wavdir, base)):
+            trans = []
+            with open(labfile, encoding="latin-1") as fh:
+                lines = fh.readlines()
+            for line in lines:                                
+                symbol = line.split(" ")[2].strip()
+                trans.append(symbol)
+        out = "%s,%s" % (base, " ".join(trans))
+        index.append(out)
+    with open(indexfile, "w") as fh:
+        fh.write("%s" % "\n".join(index)) 
+
+@app.get("/make_word_index_from_labs/")
+@cliapp.command()
+def make_word_index_from_labs(wavdir: str, labdir: str, aligndir: str):
+    ensureExistsDir(aligndir)
+    indexfile = "%s/word_index.csv" % aligndir
+    index = []
+    for labfile in sorted(glob.glob("%s/*.lab" % labdir)):
+        m = re.match("^.*/([^/.]+).lab$", labfile)
+        base = m.group(1)
+        debug(base)
+        wordlabfile = "%s/%s.ord" % (labdir, base)
+        if os.path.exists("%s/%s.wav" % (wavdir, base)):
+            wordtranses = []
+            trans = []
+            with open(labfile, encoding="latin-1") as fh:
+                lines = fh.readlines()
+            with open(wordlabfile, encoding="latin-1") as fh:
+                wordlines = fh.readlines()
+            s = 0
+            w = 0
+            while s < len(lines):
+                line = lines[s]
+                start, end, symbol = line.strip().split(" ")
+                trans.append(symbol)
+                s += 1
+
+                if w < len(wordlines):
+                    wordline = wordlines[w]
+                    wordstart, wordend, word = wordline.strip().split(" ")
+                else:
+                    wordend = end
+                    word = "<silence>"
+                    
+                debug("%s %s" % (word, symbol))
+
+                if wordend == end:
+                    w += 1
+                    wordtrans = "%s %s" % (word, " ".join(trans))
+                    wordtranses.append(wordtrans)
+                    trans = []
+                
+        out = "%s,%s" % (base, ", ".join(wordtranses))
+        index.append(out)
+    with open(indexfile, "w") as fh:
+        fh.write("%s" % "\n".join(index)) 
+
+
+
+
+        
 @app.get("/feats/")
 @cliapp.command()
 def feats(wavdir: str, aligndir: str):
     #lua shiro-fextr.lua index.csv \
     #-d "../cmu_us_bdl_arctic/orig/" \
     #-x ./extractors/extractor-xxcc-mfcc12-da-16k -r 16000    
-    if not os.path.exists(aligndir):
-        os.mkdir(aligndir)
+    ensureExistsDir(aligndir)
     featsdir = "%s/feats" % aligndir
-    if not os.path.exists(featsdir):
-        os.mkdir(featsdir)
+    ensureExistsDir(featsdir)
     indexfile = "%s/index.csv" % aligndir
 
+    if state["verbose"]:
+        quiet = ""
+    else:
+        quiet = "> /dev/null"
         
-    cmd = "lua shiro-fextr.lua %s -d \"%s\" -x ./extractors/extractor-xxcc-mfcc12-da-16k -r 16000" % (indexfile, wavdir)
+    cmd = "lua %s/shiro-fextr.lua %s -d \"%s\" -x %s/extractors/extractor-xxcc-mfcc12-da-16k -r 16000 %s" % (state["shiropath"],indexfile, wavdir, state["shiropath"], quiet)
+    #print(cmd)
     runCmd(cmd)
 
     cmd2 = "mv %s*.param %s" % (wavdir, featsdir)
@@ -147,7 +237,7 @@ def feats(wavdir: str, aligndir: str):
     
 @app.get("/train/")
 @cliapp.command()
-def train(modeldir: str, featsdir: str, indexfile: str):
+def train(modeldir: str, featsdir: str, indexfile: str, sil: bool=False):
     # Train a model given speech and phoneme transcription
 
     # (Assuming feature extraction has been done.)
@@ -155,7 +245,7 @@ def train(modeldir: str, featsdir: str, indexfile: str):
     # First step: create an empty model.
 
     # ./shiro-mkhsmm -c modeldef.json > empty.hsmm
-    cmd1 = "./shiro-mkhsmm -c %s/modeldef.json > %s/empty.hsmm" % (modeldir, modeldir)
+    cmd1 = "%s/shiro-mkhsmm -c %s/modeldef.json > %s/empty.hsmm" % (state["shiropath"], modeldir, modeldir)
     runCmd(cmd1)
     
     # Second step: initialize the model (flat start initialization scheme).
@@ -169,10 +259,14 @@ def train(modeldir: str, featsdir: str, indexfile: str):
     #   -s unaligned-segmentation.json \
     #   -FT > flat.hsmm
 
-    cmd2 = "lua shiro-mkseg.lua %s -m %s/phonemap.json -d %s -e .param -n 36 -L sil -R sil > %s/unaligned-segmentation.json" % (indexfile, modeldir, featsdir, modeldir)
+    addsil = ""
+    if sil:
+        addsil = "-L sil -R sil"
+
+    cmd2 = "lua %s/shiro-mkseg.lua %s -m %s/phonemap.json -d %s -e .param -n 36 %s > %s/unaligned-segmentation.json" % (state["shiropath"], indexfile, modeldir, featsdir, addsil, modeldir)
     runCmd(cmd2)
 
-    cmd3 = "./shiro-init -m %s/empty.hsmm -s %s/unaligned-segmentation.json -FT > %s/flat.hsmm" % (modeldir, modeldir, modeldir)
+    cmd3 = "%s/shiro-init -m %s/empty.hsmm -s %s/unaligned-segmentation.json -FT > %s/flat.hsmm" % (state["shiropath"], modeldir, modeldir, modeldir)
     runCmd(cmd3)
 
 
@@ -188,10 +282,10 @@ def train(modeldir: str, featsdir: str, indexfile: str):
     #   -s unaligned-segmentation.json \
     #   -g > markovian-segmentation.json
 
-    cmd4 = "./shiro-rest -m %s/flat.hsmm -s %s/unaligned-segmentation.json -n 5 -g > %s/markovian.hsmm" % (modeldir, modeldir, modeldir)
+    cmd4 = "%s/shiro-rest -m %s/flat.hsmm -s %s/unaligned-segmentation.json -n 5 -g > %s/markovian.hsmm" % (state["shiropath"], modeldir, modeldir, modeldir)
     runCmd(cmd4)
     
-    cmd5 = "./shiro-align -m %s/markovian.hsmm -s %s/unaligned-segmentation.json -g > %s/markovian-segmentation.json" % (modeldir, modeldir, modeldir)
+    cmd5 = "%s/shiro-align -m %s/markovian.hsmm -s %s/unaligned-segmentation.json -g > %s/markovian-segmentation.json" % (state["shiropath"], modeldir, modeldir, modeldir)
     runCmd(cmd5)
 
     # Final step: train the model using the HSMM training algorithm.
@@ -201,7 +295,7 @@ def train(modeldir: str, featsdir: str, indexfile: str):
     #   -s markovian-segmentation.json \
     #   -n 5 -p 10 -d 50 > trained.hsmm
 
-    cmd6 = "./shiro-rest -m %s/markovian.hsmm -s %s/markovian-segmentation.json -n 5 -p 10 -d 50 > %s/trained-model.hsmm" % (modeldir, modeldir, modeldir)
+    cmd6 = "%s/shiro-rest -m %s/markovian.hsmm -s %s/markovian-segmentation.json -n 5 -p 10 -d 50 > %s/trained-model.hsmm" % (state["shiropath"], modeldir, modeldir, modeldir)
     runCmd(cmd6)
 
 
@@ -215,15 +309,14 @@ def align_feats(modeldir: str, featsdir: str, aligndir: str, indexfile: str, sil
     #   -d "../cmu_us_bdl_arctic/orig/" \
     #   -e .param -n 36 -L sil -R sil > unaligned.json
 
-    if not os.path.exists(aligndir):
-        os.mkdir(aligndir)
+    ensureExistsDir(aligndir)
 
     addsil = ""
     if sil:
         addsil = "-L sil -R sil"
 
         
-    cmd1 = "lua shiro-mkseg.lua %s -m %s/phonemap.json -d %s -e .param -n 36 %s > %s/unaligned.json" % (indexfile, modeldir, featsdir, addsil, aligndir)
+    cmd1 = "lua %s/shiro-mkseg.lua %s -m %s/phonemap.json -d %s -e .param -n 36 %s > %s/unaligned.json" % (state["shiropath"], indexfile, modeldir, featsdir, addsil, aligndir)
     runCmd(cmd1)
 
     
@@ -238,11 +331,11 @@ def align_feats(modeldir: str, featsdir: str, aligndir: str, indexfile: str, sil
     #   -s initial-alignment.json \
     #   -p 10 -d 50 > refined-alignment.json    
 
-    cmd2 = "./shiro-align -m %s/trained-model.hsmm -s %s/unaligned.json -g > %s/initial-alignment.json" % (modeldir, aligndir, aligndir)
+    cmd2 = "%s/shiro-align -m %s/trained-model.hsmm -s %s/unaligned.json -g > %s/initial-alignment.json" % (state["shiropath"], modeldir, aligndir, aligndir)
     runCmd(cmd2)
     
     
-    cmd3 = "./shiro-align -m %s/trained-model.hsmm -s %s/initial-alignment.json -p 10 -d 50 > %s/refined-alignment.json" % (modeldir, aligndir, aligndir)
+    cmd3 = "%s/shiro-align -m %s/trained-model.hsmm -s %s/initial-alignment.json -p 10 -d 50 > %s/refined-alignment.json" % (state["shiropath"], modeldir, aligndir, aligndir)
     runCmd(cmd3)
 
 
@@ -252,15 +345,14 @@ def labs(aligndir: str, labdir: str):
     with open("%s/refined-alignment.json" % aligndir) as fh:
         alignments = json.load(fh)
 
-    if not os.path.exists(labdir):
-        os.mkdir(labdir)
+    ensureExistsDir(labdir)
 
     timefactor = 0.005
     
     for item in alignments["file_list"]:
         m = re.match("^.*/([^/.]+).param", item["filename"])
         base = m.group(1)
-        print(base)
+        debug(base)
         lab = []
         starttime = 0
         for state in item["states"]:
@@ -274,7 +366,8 @@ def labs(aligndir: str, labdir: str):
                 
 @app.get("/word_labs/")
 @cliapp.command()
-def word_labs(aligndir: str, labdir: str):
+def word_labs(aligndir: str, labdir: str, sil: bool=False):
+    ensureExistsDir(labdir)
     windex = {}
     with open("%s/word_index.csv" % aligndir) as fh:
         lines = fh.readlines()
@@ -282,24 +375,26 @@ def word_labs(aligndir: str, labdir: str):
             info = line.split(",")
             base = info[0]
             windex[base] = []
+            if sil:
+                windex[base] = [("sil", ["sil"])]
             for wordtrans in info[1:]:
                 wordtranslist = wordtrans.strip().split(" ")
                 word = wordtranslist[0]
                 trans = wordtranslist[1:]
                 windex[base].append((word, trans))
+            if sil:
+                windex[base].append(("sil", ["sil"]))
 
     with open("%s/refined-alignment.json" % aligndir) as fh:
         alignments = json.load(fh)
 
-    if not os.path.exists(labdir):
-        os.mkdir(labdir)
 
     timefactor = 0.005
     
     for item in alignments["file_list"]:
         m = re.match("^.*/([^/.]+).param", item["filename"])
         base = m.group(1)
-        #print(base)
+        debug(base)
         lab = []
         wlab = []
         starttime = 0
@@ -314,7 +409,7 @@ def word_labs(aligndir: str, labdir: str):
                 endtime = state["time"]*timefactor
                 symbol = state["ext"][0]
                 wsymbol = trans[i]
-                print("%d\t%d\t%s\t%s" % (i, state["time"], symbol, wsymbol))
+                debug("%d\t%d\t%s\t%s" % (i, state["time"], symbol, wsymbol))
 
                 if symbol == "pau" and wsymbol != "sil":
                     if w > 0:
@@ -350,21 +445,98 @@ def word_labs(aligndir: str, labdir: str):
             
 @app.get("/align/")
 @cliapp.command()
-def align(modeldir: str, wavdir: str, xmldir: str, aligndir: str, sil=False):
-    if not os.path.exists(aligndir):
-        os.mkdir(aligndir)
+def align(modeldir: str, aligndir: str, wavdir: str, sil: bool=False):
+    ensureExistsDir(aligndir)
 
     indexfile = "%s/index.csv" % aligndir
-    make_index_from_xml(wavdir, xmldir, indexfile)
+    #make_index_from_lab(wavdir, labdir, indexfile)
     featsdir = "%s/feats" % aligndir
-    feats(wavdir, featsdir, indexfile)
-    align_feats(modeldir, featsdir, aligndir, indexfile)
+    feats(wavdir, aligndir)
+    align_feats(modeldir, featsdir, aligndir, indexfile, sil)
     labdir = "%s/lab" % aligndir
     labs(aligndir, labdir)
+    wordlabdir = "%s/wordlab" % aligndir
+    word_labs(aligndir, wordlabdir, sil)
 
+@app.get("/align_file/")
+@cliapp.command()
+def align_file(modeldir: str, wavfile: str, transcription: str, sil: bool=False):
 
+    aligndir = "/tmp/shiro_align"
+    ensureExistsDir(aligndir)
+
+    indexfile = "%s/index.csv" % aligndir
+    base = os.path.basename(wavfile).split(".")[0]
+    with open(indexfile, "w") as fh:
+        fh.write("%s,%s\n" % (base, transcription))            
+
+    wavdir = "%s/wav/" % aligndir
+    ensureExistsDir(wavdir)
+    featsdir = "%s/feats/" % aligndir
+
+    cmd = "cp %s %s" % (wavfile, wavdir)
+    #print(cmd)
+    os.system(cmd)
+
+    feats(wavdir, aligndir)
+    align_feats(modeldir, featsdir, aligndir, indexfile, sil)
+    labdir = "%s/lab" % aligndir
+    labs(aligndir, labdir)
+    #wordlabdir = "%s/wordlab" % aligndir
+    #word_labs(aligndir, wordlabdir, sil)
+    with open("%s/%s.lab" % (labdir, base)) as fh:
+        lab = fh.read()
+        print(lab)
+
+@app.get("/word_align_file/")
+@cliapp.command()
+def word_align_file(modeldir: str, wavfile: str, wordtranscription: str, sil: bool=False):
+
+    aligndir = "/tmp/shiro_align"
+    ensureExistsDir(aligndir)
+
+    translist = []
+    for wordtrans in wordtranscription.split(","):
+        word = wordtrans.strip().split(" ")[0]
+        trans = wordtrans.strip().split(" ")[1:]
+        translist.extend(trans)
+    transcription = " ".join(translist)
+
+    #print(transcription)
+    
+    base = os.path.basename(wavfile).split(".")[0]
+
+    indexfile = "%s/index.csv" % aligndir
+    with open(indexfile, "w") as fh:
+        fh.write("%s,%s\n" % (base, transcription))            
+
+    wordindexfile = "%s/word_index.csv" % aligndir
+    with open(wordindexfile, "w") as fh:
+        fh.write("%s,%s\n" % (base, wordtranscription))            
+
+    wavdir = "%s/wav/" % aligndir
+    ensureExistsDir(wavdir)
+    featsdir = "%s/feats/" % aligndir
+
+    cmd = "cp %s %s" % (wavfile, wavdir)
+    #print(cmd)
+    os.system(cmd)
+
+    feats(wavdir, aligndir)
+    align_feats(modeldir, featsdir, aligndir, indexfile, sil)
+    #labdir = "%s/lab" % aligndir
+    #labs(aligndir, labdir)
+    wordlabdir = "%s/wordlab" % aligndir
+    word_labs(aligndir, wordlabdir, sil)
+    with open("%s/%s.lab" % (wordlabdir, base)) as fh:
+        lab = fh.read()
+        print(lab)
+    return lab.split("\n")
+        
 @cliapp.callback()
-def main(verbose: bool = typer.Option(False,"--verbose","-v")):
+def main(
+        verbose: bool = typer.Option(False,"--verbose","-v"),
+        shiropath: str = typer.Option("../SHIRO","--shiropath","-sp")):
     """
     Add annotations to sound.
     """
@@ -372,6 +544,7 @@ def main(verbose: bool = typer.Option(False,"--verbose","-v")):
         message = typer.style("Will write verbose output", fg="red")
         typer.echo(message)
         state["verbose"] = True
+    state["shiropath"] = shiropath
 
 
 if __name__ == "__main__":
