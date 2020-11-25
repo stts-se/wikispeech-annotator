@@ -487,6 +487,7 @@ def align_file(modeldir: str, wavfile: str, transcription: str, sil: bool=False)
     with open("%s/%s.lab" % (labdir, base)) as fh:
         lab = fh.read()
         print(lab)
+    return lab.split("\n")
 
 @app.get("/word_align_file/")
 @cliapp.command()
