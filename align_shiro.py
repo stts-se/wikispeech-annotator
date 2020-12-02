@@ -228,9 +228,9 @@ def feats(wavdir: str, aligndir: str):
     #print(cmd)
     runCmd(cmd)
 
-    cmd2 = "mv %s*.param %s" % (wavdir, featsdir)
+    cmd2 = "mv %s/*.param %s" % (wavdir, featsdir)
     runCmd(cmd2)
-    cmd3 = "mv %s*.raw %s" % (wavdir, featsdir)
+    cmd3 = "mv %s/*.raw %s" % (wavdir, featsdir)
     runCmd(cmd3)
 
 
