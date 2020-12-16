@@ -333,9 +333,11 @@ def align_feats(modeldir: str, featsdir: str, aligndir: str, indexfile: str, sil
 
     cmd2 = "%s/shiro-align -m %s/trained-model.hsmm -s %s/unaligned.json -g > %s/initial-alignment.json" % (state["shiropath"], modeldir, aligndir, aligndir)
     runCmd(cmd2)
+
+    #TODO compute p based on calculation in comment above
+    p = "100"
     
-    
-    cmd3 = "%s/shiro-align -m %s/trained-model.hsmm -s %s/initial-alignment.json -p 10 -d 50 > %s/refined-alignment.json" % (state["shiropath"], modeldir, aligndir, aligndir)
+    cmd3 = "%s/shiro-align -m %s/trained-model.hsmm -s %s/initial-alignment.json -p %s -d 50 > %s/refined-alignment.json" % (state["shiropath"], modeldir, aligndir, p, aligndir)
     runCmd(cmd3)
 
 
@@ -462,6 +464,16 @@ def align(modeldir: str, aligndir: str, wavdir: str, sil: bool=False):
 @cliapp.command()
 def align_file(modeldir: str, wavfile: str, transcription: str, sil: bool=False):
 
+    if os.path.exists(transcription):
+        with open(transcription) as fh:
+            transcription = fh.read().strip()
+
+    #NOTE
+    #The phoneme "ax" causes segmentation fault, temporarily replacing it with "ah"
+    transcription = transcription.replace("ax", "ah")
+
+            
+    
     aligndir = "/tmp/shiro_align"
     ensureExistsDir(aligndir)
 

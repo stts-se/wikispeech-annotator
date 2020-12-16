@@ -24,3 +24,10 @@ python3 align_shiro.py align-file test_data/nnc/model/ test_data/nnc/wav/nnc_arc
 
 
 python3 align_shiro.py word-align-file test_data/nnc/model/ test_data/nnc/wav/nnc_arctic_0033.wav "He hh iy, unfolded ah n f ow l d ah d, a ah, long l ao ng, typewritten t ay p r ih t ah n, letter l eh t er, sil sil, and ah n d, handed hh ae n d ah d, it ih t, to t uw, Gregson g r eh g s ah n" --sil
+
+
+NOTE
+There is a problem with the "ax" phoneme - seems to cause segmentation fault - yes and it doesn't exist in the nnc training data
+So: Need to make sure that all phones in phonedef.json actually occur in training data!
+
+
