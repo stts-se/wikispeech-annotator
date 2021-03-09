@@ -27,3 +27,10 @@ python3 align_shiro.py word-align-file aligner_models/nnc_en/ test_data/nnc_test
 
 python3 align_shiro.py align-file aligner_models/hb_sv/ test_data/jessica/wav/stts-001.wav "sil J A: S Ö: K k T t E0 SJ Y D d I: E N A F Ä3 R sil"
 python3 align_shiro.py word-align-file aligner_models/hb_sv/ test_data/jessica/wav/stts-001.wav "jag J A:, sökte S Ö: K k T t E0, skydd SJ Y D d, i I:, en E N, affär A F Ä3 R" --sil
+
+
+NOTE
+There is a problem with the "ax" phoneme - seems to cause segmentation fault - yes and it doesn't exist in the nnc training data
+So: Need to make sure that all phones in phonedef.json actually occur in training data!
+
+
