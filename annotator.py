@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
-import sys, json
+import sys, os, json
 import typer
 from fastapi import FastAPI
-
-
+from pydantic import BaseModel
+from enum import Enum
+from tempfile import TemporaryFile, mkstemp
+import base64
 
 from aeneas.executetask import ExecuteTask
 from aeneas.language import Language
@@ -50,7 +52,28 @@ class aeneas_aligner:
                 )
         return alignment
 
+def iso2aeneas_language_code(isocode):
+    map = {
+        "sv-SE":"swe",
+        "en-GB":"eng"
+    }
+    return map[isocode] 
 
+
+def getTmpFile(data, ext="", binary=False):
+    (_, filename) = mkstemp(suffix=ext)
+    #print(filename)
+
+    mode =  "w"
+    if binary:
+        mode = "wb"
+    
+    with open(filename, mode) as fh:
+        fh.write(data)
+    return filename
+
+def rmTmpFile(filename):
+    os.remove(filename)
 
 
 cliapp = typer.Typer()
@@ -58,6 +81,28 @@ state = {"verbose": False}
 
 
 app = FastAPI()
+
+class AlignMethod(str, Enum):
+    AENEAS = "AENEAS"
+    SHIRO = "SHIRO"
+
+    
+class AudioInputType(str, Enum):
+    BASE64 = "BASE64"
+    URL = "URL"
+
+class AudioInputFormat(str, Enum):
+    PCM = "PCM"
+    MP3 = "MP3"
+    OGG = "OGG"
+    
+class AlignRequest(BaseModel):
+    alignMethod: AlignMethod = "AENEAS"
+    audioInputType: AudioInputType = "BASE64"
+    audioInputFormat: AudioInputFormat = "PCM"
+    language: str
+    text: str
+    audioInput: str
 
 
 @app.get("/")
@@ -85,6 +130,50 @@ def align(language: str, soundfile: str, textfile: str):
     if state["verbose"]:
         message = typer.style("verbose", fg="red")
         typer.echo(message)
+    return data
+
+@app.post("/align")
+def align(areq: AlignRequest):
+
+    if areq.alignMethod == AlignMethod.AENEAS:
+        return aeneas_align(areq)
+    elif  areq.alignMethod == AlignMethod.SHIRO:
+        return shiro_align(areq)
+
+def aeneas_align(areq):
+    aeneas = aeneas_aligner(iso2aeneas_language_code(areq.language))
+
+    if areq.audioInputType == "URL":
+        alignment = aeneas.run(areq.audioInput, areq.text)
+    elif areq.audioInputType == "BASE64":
+        tmpaudio = getTmpFile(base64.b64decode(areq.audioInput), ".wav", True)
+        tmptxt = getTmpFile(areq.text, ".txt")
+        alignment = aeneas.run(tmpaudio, tmptxt)
+        rmTmpFile(tmpaudio)
+        rmTmpFile(tmptxt)
+
+    data = {
+        "alignment": alignment,
+    }
+
+    #typer.echo(json.dumps(data, indent=4))
+    if state["verbose"]:
+        message = typer.style("verbose", fg="red")
+        typer.echo(message)
+    return data
+
+def shiro_align(areq):
+    import align_shiro
+
+    modeldir = "aligner_models/nnc_en"
+    sil = True
+    wavfile = areq.audioInput
+    transcription = areq.text
+    
+    alignment = align_shiro.align_file(modeldir, wavfile, transcription, sil)
+    data = {
+        "alignment": alignment,
+    }
     return data
 
 @app.get("/validate/{language}")
