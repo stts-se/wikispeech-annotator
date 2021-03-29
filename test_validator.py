@@ -74,7 +74,8 @@ def test_is_audio_data():
 #Test that audio contains speech
 def test_audio_file_contains_speech():
     params = {
-        "audioInput": "test_data/shakespeare_part1_mono.wav",
+        #"audioInput": "test_data/shakespeare_part1_mono.wav",
+        "audioInput": "test_data/shakespeare_part1.wav",
         "audioInputType": "FILE"
         }
 

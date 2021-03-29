@@ -148,6 +148,27 @@ def test_align_json_shiro_data():
 #Test 8
 #Post audio and text data to pronlex and SHIRO for label alignment
 
+
+
+#Test 9
+#Post audio file to vad
+def test_vad_file():
+    params = {
+        "language": "en-GB",
+        "audioInput": "test_data/shakespeare_part1_par1.wav",
+        "audioInputType": "FILE"
+        }
+
+    response = client.post("/vad", json=params)
+    if response.status_code != 200:
+        print(response)
+        print(response.json())
+    assert response.status_code == 200
+    debug(json.dumps(response.json(), indent=4))    
+
+
+
+
 verbose = False
 def debug(msg):
     if verbose:
@@ -188,4 +209,5 @@ if __name__ == "__main__":
     
 #cli example:
 #http post :4567/align language="en-GB" audioInputType="FILE" text="test_data/shakespeare_part1_par1.txt" audioInput="test_data/shakespeare_part1_par1.wav"
+#http post :4567/vad language="en-GB" audioInputType="FILE" audioInput="test_data/shakespeare_part1_par1.wav"
 
