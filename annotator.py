@@ -159,6 +159,37 @@ def align(language: str, soundfile: str, textfile: str):
         typer.echo(message)
     return data
 
+
+@app.post("/vad")
+def vad(areq: AlignRequest):
+    if areq.audioInputType == AudioInputType.FILE and areq.audioInputFormat == AudioInputFormat.PCM:
+        audiofile = areq.audioInput
+    elif areq.audioInputType == AudioInputType.BASE64 and areq.audioInputFormat == AudioInputFormat.PCM:
+        tmpaudio = getTmpFile(base64.b64decode(areq.audioInput), ".wav", True)
+        audiofile = tmpaudio
+    elif areq.audioInputType == AudioInputType.FILE and areq.audioInputFormat == AudioInputFormat.MP3:
+        audiofile = areq.audioInput
+        (_, tmpaudio) = mkstemp(suffix=".wav")
+        cmd = f"sox {audiofile} -c 1 -r 16000 {tmpaudio}"
+        print(cmd)
+        os.system(cmd)
+        audiofile = tmpaudio
+    else:
+        #TODO: URL should be supported (by requests) or removed
+        raise HTTPException(status_code=422, detail=f"audioInputType {areq.audioInputType} not yet supported")
+
+
+    vad_timepoints = validator.getVadTimepoints(audiofile)
+    
+
+    
+    data = {
+        "vad": vad_timepoints,
+    }
+
+    return data
+
+
 @app.post("/align")
 def align(request: Request, areq: AlignRequest):
 
