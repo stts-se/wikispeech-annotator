@@ -27,6 +27,23 @@ def test_align_sentences_aeneas_files():
     assert response.status_code == 200
     debug(json.dumps(response.json(), indent=4))    
 
+def test_align_sentences_aeneas_files_html_out():
+    params = {
+        "language": "en-GB",
+        "text": "test_data/shakespeare_part1_par1.txt",
+        "textInputType": "FILE",
+        "audioInput": "test_data/shakespeare_part1_par1.wav",
+        "audioInputType": "FILE",
+        "returnType": "HTML"
+        }
+
+    response = client.post("/align", json=params)
+    if response.status_code != 200:
+        print(response)
+        print(response.json())
+    assert response.status_code == 200
+    debug(response.text)    
+
 
 #Test 2
 #Post audio and text data to aeneas for sentence alignment
@@ -53,6 +70,31 @@ def test_align_sentences_aeneas_data():
         print(response.json())
     assert response.status_code == 200
     debug(json.dumps(response.json(), indent=4))
+
+def test_align_sentences_aeneas_data_html_out():
+    textfile = "test_data/shakespeare_part1_par1.txt"
+    audiofile = "test_data/shakespeare_part1_par1.wav"
+
+    with open(textfile) as fh:
+        textdata = fh.read()
+
+    with open(audiofile, "rb") as fh:
+        audiodata = base64.b64encode(fh.read())
+
+    
+    params = {
+        "language": "en-GB",
+        "text": textdata,
+        "audioInput": audiodata,
+        "returnType": "HTML"
+        }
+
+    response = client.post("/align", json=params)
+    if response.status_code != 200:
+        print(response)
+        print(response.json())
+    assert response.status_code == 200
+    debug(response.text)
 
 
 #Test 3
@@ -156,11 +198,16 @@ def debug(msg):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', help='Print verbose output.', action='store_true')
+    parser.add_argument('-e', '--exit-on-error', help='Exit on first error.', action='store_true')
 
     args = parser.parse_args()
     
     verbose = args.verbose
 
+    #HB 
+    test_align_sentences_aeneas_files_html_out()
+    sys.exit()
+    
     tests = [ m for m in dir() if m.startswith('test_')]
     for test in tests:
         debug(test)
@@ -171,6 +218,8 @@ if __name__ == "__main__":
             debug(f"OK {test}")
         except:
             print(f"FAIL {test}")
+            if args.exit_on_error:
+                sys.exit()
     sys.stdout.write("\n")
     sys.exit()
     

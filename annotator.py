@@ -2,7 +2,8 @@
 
 import sys, os, json
 import typer
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from enum import Enum
 from tempfile import TemporaryFile, mkstemp
@@ -21,6 +22,11 @@ import fleep
 
 import validator
 
+
+
+
+
+
 class aeneas_aligner:
     def __init__(self, language):
         config = TaskConfiguration()
@@ -34,6 +40,9 @@ class aeneas_aligner:
 
         config[gc.PPN_TASK_LANGUAGE] = language
         config[gc.PPN_TASK_IS_TEXT_FILE_FORMAT] = TextFileFormat.PLAIN
+        #set boundary in middle of silence
+        config[gc.PPN_TASK_ADJUST_BOUNDARY_ALGORITHM] = "percent"
+        config[gc.PPN_TASK_ADJUST_BOUNDARY_PERCENT_VALUE] = 50
         self.task = Task()
         self.task.configuration = config
 
@@ -84,6 +93,8 @@ state = {"verbose": False}
 
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+
 
 class AlignMethod(str, Enum):
     AENEAS = "AENEAS"
@@ -105,6 +116,11 @@ class AudioInputFormat(str, Enum):
     PCM = "PCM"
     MP3 = "MP3"
     OGG = "OGG"
+
+class ReturnType(str, Enum):
+    JSON = "JSON"
+    HTML = "HTML"
+
     
 class AlignRequest(BaseModel):
     alignMethod: AlignMethod = AlignMethod.AENEAS
@@ -114,7 +130,7 @@ class AlignRequest(BaseModel):
     language: str = None #HB trying w None
     text: str = None #HB trying w None
     audioInput: str
-
+    returnType: ReturnType = ReturnType.JSON
 
 @app.get("/")
 @cliapp.command()
@@ -144,7 +160,7 @@ def align(language: str, soundfile: str, textfile: str):
     return data
 
 @app.post("/align")
-def align(areq: AlignRequest):
+def align(request: Request, areq: AlignRequest):
 
     if areq.audioInputType == "FILE":
         audiofile = areq.audioInput
@@ -184,7 +200,25 @@ def align(areq: AlignRequest):
         "alignment": alignment,
     }
 
-    return data
+    if areq.returnType == ReturnType.JSON:
+        return data
+    elif areq.returnType == ReturnType.HTML:
+        newtokens = []
+        for token in alignment:
+            token["dur"] = token["end"]-token["start"]
+            token["startS"] = token["start"]/1000
+            token["durS"] = token["dur"]/1000
+            newtokens.append(token)
+
+        if areq.audioInputType == AudioInputType.BASE64:
+            audio_src = "data:audio/wav;base64,"+areq.audioInput
+        else:
+            audio_src = areq.audioInput
+            #print(audio_src)
+            
+        return templates.TemplateResponse("output.html", {"request": request, "audio_src": audio_src, "tokens": newtokens})
+        #return render_template("output.html", audio_data=are.audioInput, tokens=newtokens)
+
 
     
 def aeneas_align(language, audiofile, textfile):
