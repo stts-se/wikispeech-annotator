@@ -27,7 +27,7 @@ def test_align_sentences_aeneas_files():
     assert response.status_code == 200
     debug(json.dumps(response.json(), indent=4))    
 
-def test_align_sentences_aeneas_files_html_out():
+def Xtest_align_sentences_aeneas_files_html_out():
     params = {
         "language": "en-GB",
         "text": "test_data/shakespeare_part1_par1.txt",
@@ -35,6 +35,23 @@ def test_align_sentences_aeneas_files_html_out():
         "audioInput": "test_data/shakespeare_part1_par1.wav",
         "audioInputType": "FILE",
         "returnType": "HTML"
+        }
+
+    response = client.post("/align", json=params)
+    if response.status_code != 200:
+        print(response)
+        print(response.json())
+    assert response.status_code == 200
+    debug(response.text)    
+
+def test_align_sentences_aeneas_files_lab_out():
+    params = {
+        "language": "en-GB",
+        "text": "test_data/shakespeare_part1_par1.txt",
+        "textInputType": "FILE",
+        "audioInput": "test_data/shakespeare_part1_par1.wav",
+        "audioInputType": "FILE",
+        "returnType": "LAB"
         }
 
     response = client.post("/align", json=params)
@@ -71,7 +88,7 @@ def test_align_sentences_aeneas_data():
     assert response.status_code == 200
     debug(json.dumps(response.json(), indent=4))
 
-def test_align_sentences_aeneas_data_html_out():
+def Xtest_align_sentences_aeneas_data_html_out():
     textfile = "test_data/shakespeare_part1_par1.txt"
     audiofile = "test_data/shakespeare_part1_par1.wav"
 
@@ -226,7 +243,7 @@ if __name__ == "__main__":
     verbose = args.verbose
 
     #HB 
-    test_align_sentences_aeneas_files_html_out()
+    test_align_sentences_aeneas_files_lab_out()
     sys.exit()
     
     tests = [ m for m in dir() if m.startswith('test_')]
@@ -259,4 +276,6 @@ if __name__ == "__main__":
 #cli example:
 #http post :4567/align language="en-GB" audioInputType="FILE" text="test_data/shakespeare_part1_par1.txt" audioInput="test_data/shakespeare_part1_par1.wav"
 #http post :4567/vad language="en-GB" audioInputType="FILE" audioInput="test_data/shakespeare_part1_par1.wav"
+
+#http post :4567/align language="sv-SE" audioInputType="FILE" audioInputFormat="MP3" audioInput="/home/harald/git/karin_boye/audio/boye_evighet_boye.mp3" textInputType="FILE" text="/home/harald/git/karin_boye/text/boye_evighet_boye.txt" returnType="LAB"
 

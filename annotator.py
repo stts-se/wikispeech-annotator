@@ -2,7 +2,7 @@
 
 import sys, os, json
 import typer
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from enum import Enum
@@ -120,7 +120,7 @@ class AudioInputFormat(str, Enum):
 class ReturnType(str, Enum):
     JSON = "JSON"
     HTML = "HTML"
-
+    LAB = "LAB"
     
 class AlignRequest(BaseModel):
     alignMethod: AlignMethod = AlignMethod.AENEAS
@@ -170,6 +170,7 @@ def vad(areq: AlignRequest):
     elif areq.audioInputType == AudioInputType.FILE and areq.audioInputFormat == AudioInputFormat.MP3:
         audiofile = areq.audioInput
         (_, tmpaudio) = mkstemp(suffix=".wav")
+        #HB TODO remove system calls
         cmd = f"sox {audiofile} -c 1 -r 16000 {tmpaudio}"
         print(cmd)
         os.system(cmd)
@@ -186,8 +187,16 @@ def vad(areq: AlignRequest):
     data = {
         "vad": vad_timepoints,
     }
+    if areq.returnType == ReturnType.JSON:
+        return data
+    elif areq.returnType == ReturnType.LAB:
+        lab = list()
+        for item in vad_timepoints:
+            lab.append(f'{item["start"]} {item["end"]} {item["text"]}')
+        data = "\n".join(lab)
+        return Response(content=data, media_type="text/plain")
 
-    return data
+    
 
 
 @app.post("/align")
@@ -249,6 +258,15 @@ def align(request: Request, areq: AlignRequest):
             
         return templates.TemplateResponse("output.html", {"request": request, "audio_src": audio_src, "tokens": newtokens})
         #return render_template("output.html", audio_data=are.audioInput, tokens=newtokens)
+    elif areq.returnType == ReturnType.LAB:
+        lab = list()
+        for item in alignment:
+            start = round(item["start"]/1000, 2)
+            end = round(item["end"]/1000, 2)
+            lab.append(f'{start} {end} {item["text"]}')
+        data = "\n".join(lab)
+        return Response(content=data, media_type="text/plain")
+        
 
 
     
