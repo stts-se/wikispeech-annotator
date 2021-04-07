@@ -36,7 +36,7 @@ class aeneas_aligner:
                 "Supported languages are:\n%s" % "\n".join(Language.CODE_TO_HUMAN_LIST)
             )
             sys.exit()
-            #return "ERROR"
+
 
         config[gc.PPN_TASK_LANGUAGE] = language
         config[gc.PPN_TASK_IS_TEXT_FILE_FORMAT] = TextFileFormat.PLAIN
@@ -160,6 +160,21 @@ def align(language: str, soundfile: str, textfile: str):
     return data
 
 
+
+
+@app.get("/vad")
+@cliapp.command()
+def vad(soundfile: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON):
+    areq = AlignRequest(audioInput=soundfile, audioInputType=audioInputType, returnType=returnType)
+    result = vad(areq)
+    if returnType == ReturnType.JSON:
+        typer.echo(json.dumps(result, indent=4))
+    else:
+        print(result.body.decode())
+    return result
+
+
+    
 @app.post("/vad")
 def vad(areq: AlignRequest):
     if areq.audioInputType == AudioInputType.FILE and areq.audioInputFormat == AudioInputFormat.PCM:
@@ -187,6 +202,8 @@ def vad(areq: AlignRequest):
     data = {
         "vad": vad_timepoints,
     }
+
+    
     if areq.returnType == ReturnType.JSON:
         return data
     elif areq.returnType == ReturnType.LAB:
@@ -356,20 +373,13 @@ def shiro_align_json(language, audiofile, textfile):
     return alignment
 
 
-#HB OLD
-@app.get("/validate/{language}")
+@app.get("/validate")
 @cliapp.command()
-def validate(language: str, soundfile: str, jsonfile: str):
-    v = validator(verbose=state["verbose"])
-
-    with open(jsonfile) as fh:
-        data = json.load(fh)
-    
-    result = v.run(soundfile, data)
-
+def validate(soundfile: str, audioInputType: str = AudioInputType.FILE, jsonfile: str = None, language: str = None ):
+    areq = AlignRequest(audioInput=soundfile, audioInputType=audioInputType)
+    result = validate(areq)
     typer.echo(json.dumps(result, indent=4))
     return result
-#END HB OLD
 
 
 @app.post("/validate")

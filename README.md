@@ -32,12 +32,41 @@ Example:
 input is longer soundfile and text
 output is json with text+sentence time points
 
-cli example:
+cli example with server:
 ```
 http post :4567/align language="en-GB" textInputType="FILE" text=~/git/wikispeech-annotator/test_data/shakespeare_part1_par1.txt audioInputType="FILE" audioInput=~/git/wikispeech-annotator/test_data/shakespeare_part1_par1.wav
 
 http post :4567/align language="sv-SE" audioInputType="FILE" audioInput=~/git/karin_boye/audio/boye_javisstgordetont.mp3 textInputType="FILE" text=~/git/karin_boye/text/boye_javisstgordetont.txt
 ```
+
+
+Example:
+
+Validate sound file
+
+```
+python3 annotator.py validate test_data/shakespeare_part1.wav
+```
+```
+http post :4567/validate audioInputType="FILE" audioInput=test_data/shakespeare_part1.wav
+```
+
+Example:
+
+Get VAD time points for sound file
+
+```
+python3 annotator.py vad test_data/shakespeare_part1.wav
+python3 annotator.py vad test_data/shakespeare_part1.wav --returntype LAB
+```
+
+
+```
+http post :4567/vad audioInputType="FILE" audioInput=test_data/shakespeare_part1.wav
+http post :4567/vad audioInputType="FILE" audioInput=test_data/shakespeare_part1.wav returnType=LAB
+```
+
+
 
 
 Second example:
