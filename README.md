@@ -11,7 +11,9 @@ python3 -m pip install -r requirements.txt
 ```
 
 Run test server:
-```python3 -m uvicorn --reload --port 4567 annotator:app```
+```
+python3 -m uvicorn --reload --port 4567 annotator:app
+```
 
 Run server as system service:
 ```
@@ -26,29 +28,18 @@ sudo make uninstall
 
 
 
-1) json format for annotation:
-audio: (file,url,data,..) (timepoints?)
-transcription: text, phonetic, .. (timepoints)
-other annotations (what? timepoints)
-
-2) simple rest api + cli 
-
-python3 -m uvicorn --port 4567 annotator:app
-
-annotate/text
-annotate/transcribe
-etc
-
-3) first example:
+Example:
 input is longer soundfile and text
 output is json with text+sentence time points
 
-4) second example:
+cli example:
+```
+http post :4567/align language="en-GB" textInputType="FILE" text=~/git/wikispeech-annotator/test_data/shakespeare_part1_par1.txt audioInputType="FILE" audioInput=~/git/wikispeech-annotator/test_data/shakespeare_part1_par1.wav
+
+http post :4567/align language="sv-SE" audioInputType="FILE" audioInput=~/git/karin_boye/audio/boye_javisstgordetont.mp3 textInputType="FILE" text=~/git/karin_boye/text/boye_javisstgordetont.txt
+```
+
+
+Second example:
 input is sentence soundfile and text
 output is json with text+word time points and phonemes+time points
-
-
-#cli example:
-#http post :4567/align language="en-GB" audioInputType="FILE" text="test_data/shakespeare_part1_par1.txt" audioInput="test_data/shakespeare_part1_par1.wav"
-
-http post :4567/align language="sv-SE" audioInputType="FILE" audioInput="/home/harald/git/karin_boye/audio/boye_javisstgordetont.mp3" textInputType="FILE" text="/home/harald/git/karin_boye/text/boye_javisstgordetont.txt"
