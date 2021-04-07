@@ -17,7 +17,7 @@ from aeneas.task import TaskConfiguration
 from aeneas.textfile import TextFileFormat
 import aeneas.globalconstants as gc
 
-import align_shiro
+#import align_shiro
 import fleep
 
 import validator

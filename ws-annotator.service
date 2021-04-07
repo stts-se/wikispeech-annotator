@@ -1,0 +1,13 @@
+[Unit]
+Description=Wikispeech Annotator System Service
+
+[Service]
+WorkingDirectory=/usr/local/lib/ws-annotator/
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/usr/local/etc/ws-annotator/ws-annotator.env
+ExecStart=/usr/local/lib/ws-annotator/venv/bin/python3 -m uvicorn --port 4567 --app-dir /usr/local/lib/ws-annotator annotator:app
+
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

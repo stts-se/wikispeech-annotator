@@ -1,0 +1,10 @@
+fleep==1.0.1
+pydantic==1.6.1
+webrtcvad==2.0.10
+lxml==4.5.0
+numpy
+uvicorn
+jinja2
+aeneas==1.7.3.0
+fastapi==0.63.0
+typer==0.3.2
