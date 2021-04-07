@@ -143,6 +143,7 @@ def hello():
 @app.get("/align/{language}")
 @cliapp.command()
 def align(language: str, soundfile: str, textfile: str):
+    #HB TODO build areq and run "post" command (like vad and validate)
     aeneas = aeneas_aligner(language)
     alignment = aeneas.run(soundfile, textfile)
 

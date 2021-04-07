@@ -32,7 +32,11 @@ Example:
 input is longer soundfile and text
 output is json with text+sentence time points
 
-cli example with server:
+```
+python3 annotator.py align swe ~/git/karin_boye/audio/boye_javisstgordetont.mp3 ~/git/karin_boye/text/boye_javisstgordetont.txt
+python3 annotator.py align eng test_data/shakespeare_part1.wav test_data/shakespeare_part1.txt
+```
+
 ```
 http post :4567/align language="en-GB" textInputType="FILE" text=~/git/wikispeech-annotator/test_data/shakespeare_part1_par1.txt audioInputType="FILE" audioInput=~/git/wikispeech-annotator/test_data/shakespeare_part1_par1.wav
 
