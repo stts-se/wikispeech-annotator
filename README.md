@@ -1,17 +1,20 @@
 # wikispeech-annotator
 
 Dependencies:
-
+```
 sudo apt install python3-venv
 sudo apt install libespeak-dev
-
+```
+```
 python3 -m pip install numpy
 python3 -m pip install -r requirements.txt 
+```
 
 Run test server:
-python3 -m uvicorn --reload --port 4567 annotator:app
+```python3 -m uvicorn --reload --port 4567 annotator:app```
 
 Run server as system service:
+```
 sudo make install
 sudo systemctl start ws-annotator
 sudo systemctl status ws-annotator
@@ -19,7 +22,7 @@ journalctl -r -u ws-annotator
 
 sudo systemctl stop ws-annotator
 sudo make uninstall
-
+```
 
 
 
