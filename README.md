@@ -2,6 +2,9 @@
 
 Dependencies:
 
+sudo apt install python3-venv
+sudo apt install libespeak-dev
+
 python3 -m pip install numpy
 python3 -m pip install -r requirements.txt 
 
