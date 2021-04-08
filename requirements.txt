@@ -8,3 +8,4 @@ jinja2
 aeneas==1.7.3.0
 fastapi==0.63.0
 typer==0.3.2
+aiofiles

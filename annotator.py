@@ -4,6 +4,8 @@ import sys, os, json
 import typer
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+
 from pydantic import BaseModel
 from enum import Enum
 from tempfile import TemporaryFile, mkstemp
@@ -94,6 +96,12 @@ state = {"verbose": False}
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/test_data", StaticFiles(directory="test_data"), name="test_data")
+
+
+
+
 
 
 class AlignMethod(str, Enum):
@@ -122,7 +130,7 @@ class ReturnType(str, Enum):
     HTML = "HTML"
     LAB = "LAB"
     
-class AlignRequest(BaseModel):
+class AnnotationRequest(BaseModel):
     alignMethod: AlignMethod = AlignMethod.AENEAS
     audioInputType: AudioInputType = AudioInputType.BASE64
     audioInputFormat: AudioInputFormat = AudioInputFormat.PCM
@@ -132,52 +140,44 @@ class AlignRequest(BaseModel):
     audioInput: str
     returnType: ReturnType = ReturnType.JSON
 
+
+
+
+
+
+
+
+
+
+####### INDEX ########
+    
 @app.get("/")
+def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+######## VAD ##########
+
 @cliapp.command()
-def hello():
-    message = typer.style("hello", fg="green")
-    typer.echo(message)
-    return "hello"
-
-
-@app.get("/align/{language}")
-@cliapp.command()
-def align(language: str, soundfile: str, textfile: str):
-    #HB TODO build areq and run "post" command (like vad and validate)
-    aeneas = aeneas_aligner(language)
-    alignment = aeneas.run(soundfile, textfile)
-
-    data = {
-        "sound_file": soundfile,
-        "text_file": textfile,
-        "language": language,
-        "alignment": alignment,
-    }
-
-    typer.echo(json.dumps(data, indent=4))
-    if state["verbose"]:
-        message = typer.style("verbose", fg="red")
-        typer.echo(message)
-    return data
-
-
-
-
-@app.get("/vad")
-@cliapp.command()
-def vad(soundfile: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON):
-    areq = AlignRequest(audioInput=soundfile, audioInputType=audioInputType, returnType=returnType)
-    result = vad(areq)
+def vad(audioinput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON):
+    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, returnType=returnType)
+    result = vad(None, areq)
     if returnType == ReturnType.JSON:
         typer.echo(json.dumps(result, indent=4))
     else:
         print(result.body.decode())
+
+
+@app.get("/vad")
+def vad(request: Request, audioInput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON):
+    areq = AnnotationRequest(audioInput=audioInput, audioInputType=audioInputType, returnType=returnType)
+    result = vad(request, areq)
     return result
 
 
     
 @app.post("/vad")
-def vad(areq: AlignRequest):
+def vad(request: Request, areq: AnnotationRequest):
     if areq.audioInputType == AudioInputType.FILE and areq.audioInputFormat == AudioInputFormat.PCM:
         audiofile = areq.audioInput
     elif areq.audioInputType == AudioInputType.BASE64 and areq.audioInputFormat == AudioInputFormat.PCM:
@@ -207,6 +207,22 @@ def vad(areq: AlignRequest):
     
     if areq.returnType == ReturnType.JSON:
         return data
+    elif areq.returnType == ReturnType.HTML:
+        newtokens = []
+        for token in vad_timepoints:
+            token["dur"] = token["end"]-token["start"]
+            #token["startS"] = token["start"]/1000
+            #token["durS"] = token["dur"]/1000
+            token["startS"] = token["start"]
+            token["durS"] = token["dur"]
+            newtokens.append(token)
+
+        if areq.audioInputType == AudioInputType.BASE64:
+            audio_src = "data:audio/wav;base64,"+areq.audioInput
+        else:
+            audio_src = areq.audioInput
+            
+        return templates.TemplateResponse("output.html", {"request": request, "audio_src": audio_src, "tokens": newtokens})
     elif areq.returnType == ReturnType.LAB:
         lab = list()
         for item in vad_timepoints:
@@ -214,11 +230,34 @@ def vad(areq: AlignRequest):
         data = "\n".join(lab)
         return Response(content=data, media_type="text/plain")
 
+
+
+
+
+########## ALIGN ##########
+
+
     
+@cliapp.command()
+def align(audioinput: str, textinput: str, language: str = "sv-SE", audioInputType: str = AudioInputType.FILE, textInputType: str = TextInputType.FILE, returnType: str = ReturnType.JSON):
+    areq = AnnotationRequest(audioInput=audioinput, text=textinput, language=language, audioInputType=audioInputType, textInputType=textInputType, returnType=returnType)
+    result = align(None, areq)
+    if returnType == ReturnType.JSON:
+        typer.echo(json.dumps(result, indent=4))
+    else:
+        print(result.body.decode())
+    return result
+    
+@app.get("/align")
+def align(request: Request, audioInput: str, textInput: str, language: str = "sv-SE", audioInputType: str = AudioInputType.FILE, textInputType: str = TextInputType.FILE, returnType: str = ReturnType.JSON):
+    areq = AnnotationRequest(audioInput=audioInput, text=textInput, language=language, audioInputType=audioInputType, textInputType=textInputType, returnType=returnType)
+    result = align(request, areq)
+    return result
+
 
 
 @app.post("/align")
-def align(request: Request, areq: AlignRequest):
+def align(request: Request, areq: AnnotationRequest):
 
     if areq.audioInputType == "FILE":
         audiofile = areq.audioInput
@@ -272,10 +311,9 @@ def align(request: Request, areq: AlignRequest):
             audio_src = "data:audio/wav;base64,"+areq.audioInput
         else:
             audio_src = areq.audioInput
-            #print(audio_src)
             
         return templates.TemplateResponse("output.html", {"request": request, "audio_src": audio_src, "tokens": newtokens})
-        #return render_template("output.html", audio_data=are.audioInput, tokens=newtokens)
+
     elif areq.returnType == ReturnType.LAB:
         lab = list()
         for item in alignment:
@@ -373,18 +411,25 @@ def shiro_align_json(language, audiofile, textfile):
             
     return alignment
 
+########## VALIDATE ########################
 
-@app.get("/validate")
 @cliapp.command()
-def validate(soundfile: str, audioInputType: str = AudioInputType.FILE, jsonfile: str = None, language: str = None ):
-    areq = AlignRequest(audioInput=soundfile, audioInputType=audioInputType)
+def validate(audioinput: str, audioInputType: str = AudioInputType.FILE, jsonfile: str = None, language: str = None ):
+    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType)
     result = validate(areq)
     typer.echo(json.dumps(result, indent=4))
+
+
+
+@app.get("/validate")
+def validate(audioInput: str, audioInputType: str = AudioInputType.FILE, jsonfile: str = None, language: str = None ):
+    areq = AnnotationRequest(audioInput=audioInput, audioInputType=audioInputType)
+    result = validate(areq)
     return result
 
 
 @app.post("/validate")
-def validate(areq: AlignRequest):
+def validate(areq: AnnotationRequest):
     vals = []
     val_msgs = []
 

@@ -116,7 +116,7 @@ def Xtest_align_sentences_aeneas_data_html_out():
 
 #Test 3
 #Post audio and label file to SHIRO for label alignment
-def test_align_phonemes_shiro_files():
+def Xtest_align_phonemes_shiro_files():
     params = {
         "language": "en-GB",
         "text": "test_data/nnc_test/lab/nnc_arctic_0033.phones",
@@ -135,7 +135,7 @@ def test_align_phonemes_shiro_files():
 
 #Test 4
 #Post audio and label data to SHIRO for label alignment
-def test_align_phonemes_shiro_data():
+def Xtest_align_phonemes_shiro_data():
 
     audiofile = "test_data/nnc_test/wav/nnc_arctic_0033.wav"
     with open(audiofile, "rb") as fh:
@@ -157,7 +157,7 @@ def test_align_phonemes_shiro_data():
 
 #Test 5
 #Post audio and transcribed json file to SHIRO for label alignment
-def test_align_json_shiro_files():
+def Xtest_align_json_shiro_files():
     params = {
         "language": "en-GB",
         "text": "test_data/nnc_test/lab/nnc_arctic_0033.json",
@@ -176,7 +176,7 @@ def test_align_json_shiro_files():
 
 #Test 6
 #Post audio and transcribed json data to SHIRO for label alignment
-def test_align_json_shiro_data():
+def Xtest_align_json_shiro_data():
     textfile = "test_data/nnc_test/lab/nnc_arctic_0033.json"
     audiofile = "test_data/nnc_test/wav/nnc_arctic_0033.wav"
 

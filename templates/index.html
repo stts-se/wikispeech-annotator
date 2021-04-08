@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="static/style.css">
+  </head>
+  <body>
+    <h3>GET</h3>
+    <div>
+      <h4>VAD</h4>
+      <a href="http://localhost:4567/vad?audioInput=test_data/shakespeare_part1.wav">http://localhost:4567/vad?audioInput=test_data/shakespeare_part1.wav</a>
+      <br/>
+      <a href="http://localhost:4567/vad?audioInput=test_data/shakespeare_part1.wav&returnType=HTML">http://localhost:4567/vad?audioInput=test_data/shakespeare_part1.wav&returnType=HTML</a>      
+    </div>
+    <div>
+      <h4>ALIGN</h4>
+      <a href="http://localhost:4567/align?audioInput=test_data/shakespeare_part1.wav&textInput=test_data/shakespeare_part1.txt&language=en-GB">http://localhost:4567/align?audioInput=test_data/shakespeare_part1.wav&textInput=test_data/shakespeare_part1.txt&language=en-GB</a>
+      <br/>
+      <a href="http://localhost:4567/align?audioInput=test_data/shakespeare_part1.wav&textInput=test_data/shakespeare_part1.txt&language=en-GB&returnType=LAB">http://localhost:4567/align?audioInput=test_data/shakespeare_part1.wav&textInput=test_data/shakespeare_part1.txt&language=en-GB&returnType=LAB</a>
+      <br/>
+      <a href="http://localhost:4567/align?audioInput=test_data/shakespeare_part1.wav&textInput=test_data/shakespeare_part1.txt&language=en-GB&returnType=HTML">http://localhost:4567/align?audioInput=test_data/shakespeare_part1.wav&textInput=test_data/shakespeare_part1.txt&language=en-GB&returnType=HTML</a>
+    </div>
+
+    <div>
+      <h4>VALIDATE</h4>
+      <a href="http://localhost:4567/validate?audioInput=test_data/shakespeare_part1.wav">http://localhost:4567/validate?audioInput=test_data/shakespeare_part1.wav</a>
+      <br/>
+      <a href="http://localhost:4567/validate?audioInput=test_data/silence15.wav">http://localhost:4567/validate?audioInput=test_data/silence15.wav</a>
+      
+    </div>      
+
+  </body>
+</html>
