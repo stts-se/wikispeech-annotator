@@ -195,9 +195,11 @@ def vad(request: Request, areq: AnnotationRequest):
         #TODO: URL should be supported (by requests) or removed
         raise HTTPException(status_code=422, detail=f"audioInputType {areq.audioInputType} not yet supported")
 
-
-    vad_timepoints = validator.getVadTimepoints(audiofile)
-    
+    try:
+        vad_timepoints = validator.getVadTimepoints(audiofile)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"VAD processing error: {e}")
+        
 
     
     data = {
@@ -278,13 +280,15 @@ def align(request: Request, areq: AnnotationRequest):
         #TODO: URL should be supported (by requests) or removed        
         raise HTTPException(status_code=422, detail=f"textInputType {areq.textInputType} not yet supported")
 
-    
-    if areq.alignMethod == AlignMethod.AENEAS:
-        alignment = aeneas_align(areq.language, audiofile, textfile)
-    elif  areq.alignMethod == AlignMethod.SHIRO:
-        alignment = shiro_align(areq.language, audiofile, textfile)
-    elif  areq.alignMethod == AlignMethod.JSON_SHIRO:
-        alignment = shiro_align_json(areq.language, audiofile, textfile)
+    try:
+        if areq.alignMethod == AlignMethod.AENEAS:
+            alignment = aeneas_align(areq.language, audiofile, textfile)
+        elif  areq.alignMethod == AlignMethod.SHIRO:
+            alignment = shiro_align(areq.language, audiofile, textfile)
+        elif  areq.alignMethod == AlignMethod.JSON_SHIRO:
+            alignment = shiro_align_json(areq.language, audiofile, textfile)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"ALIGN processing error: {e}")
 
     
     if areq.audioInputType == "BASE64":
@@ -433,13 +437,17 @@ def validate(areq: AnnotationRequest):
     vals = []
     val_msgs = []
 
-    #1) Format should be wav, mp3, ogg (opus) and match specified format in areq
-    vals.append(validate_audio_format(areq))
+    try:
+        #1) Format should be wav, mp3, ogg (opus) and match specified format in areq
+        vals.append(validate_audio_format(areq))
 
-    #2) Audio should contain speech
-    vals.append(validate_audio_contains_speech(areq))
-
-    score = getValScore(vals)
+        #2) Audio should contain speech
+        vals.append(validate_audio_contains_speech(areq))
+        
+        score = getValScore(vals)
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"VALIDATE processing error: {e}")
+        
     return {
         "score": f"{score:.2f}",
         "validation": vals
