@@ -73,6 +73,20 @@ http post :4567/vad audioInputType="FILE" audioInput=test_data/shakespeare_part1
 
 
 
-Second example:
-input is sentence soundfile and text
+Example:
+
+input is soundfile and phonemes
+
+```
+python3 annotator.py align test_data/shakespeare_sent1_phrase1.wav "w ih l ih ah m sh ey k s p iy r" --textinputtype=STRING --alignmethod=SHIRO --language=en-GB
+python3 annotator.py align test_data/shakespeare_sent1_phrase1.wav test_data/shakespeare_sent1_phrase1.json --textinputtype=FILE --alignmethod=JSON_SHIRO --language=en-GB
+```
+
+```
+http post :4567/align audioInputType="FILE" audioInput=test_data/shakespeare_sent1_phrase1.wav textInputType=STRING text="w ih l ih ah m sh ey k s p iy r" alignMethod=SHIRO language=en-GB
+http post :4567/align audioInputType="FILE" audioInput=test_data/shakespeare_sent1_phrase1.wav textInputType=FILE text=test_data/shakespeare_sent1_phrase1.json alignMethod=JSON_SHIRO language=en-GB 
+```
+
+
+
 output is json with text+word time points and phonemes+time points

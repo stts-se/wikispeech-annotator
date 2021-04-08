@@ -1,0 +1,12 @@
+{
+    "text": [
+	{
+	    "word":"William",
+	    "phones":["w", "ih", "l", "ih", "ah", "m"]
+	},
+	{
+	    "word":"Shakespeare",
+	    "phones":["sh", "ey", "k", "s", "p", "iy", "r"]
+	}
+    ]
+}

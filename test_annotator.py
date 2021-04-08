@@ -27,7 +27,7 @@ def test_align_sentences_aeneas_files():
     assert response.status_code == 200
     debug(json.dumps(response.json(), indent=4))    
 
-def Xtest_align_sentences_aeneas_files_html_out():
+def test_align_sentences_aeneas_files_html_out():
     params = {
         "language": "en-GB",
         "text": "test_data/shakespeare_part1_par1.txt",
@@ -88,7 +88,7 @@ def test_align_sentences_aeneas_data():
     assert response.status_code == 200
     debug(json.dumps(response.json(), indent=4))
 
-def Xtest_align_sentences_aeneas_data_html_out():
+def test_align_sentences_aeneas_data_html_out():
     textfile = "test_data/shakespeare_part1_par1.txt"
     audiofile = "test_data/shakespeare_part1_par1.wav"
 
@@ -116,12 +116,12 @@ def Xtest_align_sentences_aeneas_data_html_out():
 
 #Test 3
 #Post audio and label file to SHIRO for label alignment
-def Xtest_align_phonemes_shiro_files():
+def test_align_phonemes_shiro_files():
     params = {
         "language": "en-GB",
-        "text": "test_data/nnc_test/lab/nnc_arctic_0033.phones",
+        "text": "test_data/shakespeare_sent1_phrase1.phones",
         "textInputType": "FILE",
-        "audioInput": "test_data/nnc_test/wav/nnc_arctic_0033.wav",
+        "audioInput": "test_data/shakespeare_sent1_phrase1.wav",
         "audioInputType": "FILE",
         "alignMethod": "SHIRO"
         }
@@ -135,21 +135,22 @@ def Xtest_align_phonemes_shiro_files():
 
 #Test 4
 #Post audio and label data to SHIRO for label alignment
-def Xtest_align_phonemes_shiro_data():
+def test_align_phonemes_shiro_data():
 
-    audiofile = "test_data/nnc_test/wav/nnc_arctic_0033.wav"
+    audiofile = "test_data/shakespeare_sent1_phrase1.wav"
     with open(audiofile, "rb") as fh:
         audiodata = base64.b64encode(fh.read())
 
     params = {
         "language": "en-GB",
-        "text": "hh iy ah n f ow l d ah d ah l ao ng t ay p r ih t ah n l eh t er sil ah n d hh ae n d ah d ih t t uw g r eh g s ah n",
+        "text": "w ih l ih ah m sh ey k s p iy r",
         "audioInput": audiodata,
         "alignMethod": "SHIRO"
         }
     response = client.post("/align", json=params)
     if response.status_code != 200:
         print(response)
+        print(response.text)
     assert response.status_code == 200
     debug(json.dumps(response.json(), indent=4))
 
@@ -157,12 +158,12 @@ def Xtest_align_phonemes_shiro_data():
 
 #Test 5
 #Post audio and transcribed json file to SHIRO for label alignment
-def Xtest_align_json_shiro_files():
+def test_align_json_shiro_files():
     params = {
         "language": "en-GB",
-        "text": "test_data/nnc_test/lab/nnc_arctic_0033.json",
+        "text": "test_data/shakespeare_sent1_phrase1.json",
         "textInputType": "FILE",
-        "audioInput": "test_data/nnc_test/wav/nnc_arctic_0033.wav",
+        "audioInput": "test_data/shakespeare_sent1_phrase1.wav",
         "audioInputType": "FILE",
         "alignMethod": "JSON_SHIRO"
         }
@@ -176,9 +177,9 @@ def Xtest_align_json_shiro_files():
 
 #Test 6
 #Post audio and transcribed json data to SHIRO for label alignment
-def Xtest_align_json_shiro_data():
-    textfile = "test_data/nnc_test/lab/nnc_arctic_0033.json"
-    audiofile = "test_data/nnc_test/wav/nnc_arctic_0033.wav"
+def test_align_json_shiro_data():
+    textfile = "test_data/shakespeare_sent1_phrase1.json"
+    audiofile = "test_data/shakespeare_sent1_phrase1.wav"
 
     with open(textfile) as fh:
         textdata = fh.read()
@@ -243,8 +244,9 @@ if __name__ == "__main__":
     verbose = args.verbose
 
     #HB 
-    test_align_sentences_aeneas_files_lab_out()
-    sys.exit()
+    #test_align_sentences_aeneas_files_lab_out()
+    #test_align_phonemes_shiro_data()
+    #sys.exit()
     
     tests = [ m for m in dir() if m.startswith('test_')]
     for test in tests:

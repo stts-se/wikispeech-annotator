@@ -19,7 +19,7 @@ from aeneas.task import TaskConfiguration
 from aeneas.textfile import TextFileFormat
 import aeneas.globalconstants as gc
 
-#import align_shiro
+import align_shiro
 import fleep
 
 import validator
@@ -241,8 +241,8 @@ def vad(request: Request, areq: AnnotationRequest):
 
     
 @cliapp.command()
-def align(audioinput: str, textinput: str, language: str = "sv-SE", audioInputType: str = AudioInputType.FILE, textInputType: str = TextInputType.FILE, returnType: str = ReturnType.JSON):
-    areq = AnnotationRequest(audioInput=audioinput, text=textinput, language=language, audioInputType=audioInputType, textInputType=textInputType, returnType=returnType)
+def align(audioinput: str, textinput: str, language: str = "sv-SE", audioInputType: str = AudioInputType.FILE, textInputType: str = TextInputType.FILE, returnType: str = ReturnType.JSON, alignMethod: str = AlignMethod.AENEAS):
+    areq = AnnotationRequest(audioInput=audioinput, text=textinput, language=language, audioInputType=audioInputType, textInputType=textInputType, returnType=returnType, alignMethod=alignMethod)
     result = align(None, areq)
     if returnType == ReturnType.JSON:
         typer.echo(json.dumps(result, indent=4))
@@ -251,8 +251,8 @@ def align(audioinput: str, textinput: str, language: str = "sv-SE", audioInputTy
     return result
     
 @app.get("/align")
-def align(request: Request, audioInput: str, textInput: str, language: str = "sv-SE", audioInputType: str = AudioInputType.FILE, textInputType: str = TextInputType.FILE, returnType: str = ReturnType.JSON):
-    areq = AnnotationRequest(audioInput=audioInput, text=textInput, language=language, audioInputType=audioInputType, textInputType=textInputType, returnType=returnType)
+def align(request: Request, audioInput: str, textInput: str, language: str = "sv-SE", audioInputType: str = AudioInputType.FILE, textInputType: str = TextInputType.FILE, returnType: str = ReturnType.JSON, alignMethod: str = AlignMethod.AENEAS):
+    areq = AnnotationRequest(audioInput=audioInput, text=textInput, language=language, audioInputType=audioInputType, textInputType=textInputType, returnType=returnType, alignMethod=alignMethod)
     result = align(request, areq)
     return result
 
