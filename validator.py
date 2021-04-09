@@ -7,10 +7,17 @@ default_config = {
     "validation_steps":
     [
         {
-            "function": "segment_averageCharDuration",
+            "function": "text_averageCharDuration",
             "config": {
                 "minAverageCharDuration": 56,
                 "maxAverageCharDuration": 85
+            }
+        },
+        {
+            "function": "segment_averagePhoneDuration",
+            "config": {
+                "minAveragePhoneDuration": 56,
+                "maxAveragePhoneDuration": 85
             }
         }
     ]
@@ -44,6 +51,10 @@ class validator:
         if self.verbose:
             print(msg)
 
+
+
+    
+            
         
     def run(self, audio, data):
 
@@ -85,25 +96,49 @@ class validator:
         return default_config
 
 
+def matchAudioAndTextLength(soundfile, textfile):
+    #durations in ms
+    minAverageCharDuration = 50
+    maxAverageCharDuration = 100
 
+    from mutagen.wave import WAVE
+    audioDuration = WAVE(soundfile).info.length*1000
+    with open(textfile) as fh:
+        nChars = len(fh.read())
+    averageCharDuration = audioDuration/nChars
 
-def segment_averageCharDuration(segment, config):
-    minAverageCharDuration = config["minAverageCharDuration"]
-    maxAverageCharDuration = config["maxAverageCharDuration"]
+    #print(f"{audioDuration}\t{nChars}\t{averageCharDuration}")
+    
+    if minAverageCharDuration < averageCharDuration < maxAverageCharDuration:
+        val_msg = "Text length is in required range: OK"
+        val = 1
+    else:
+        val_msg = "Text length is NOT in required range"
+        val = 0
+    return {
+        "source": "matchAudioAndTextLength",
+        "validation": val,
+        "message": val_msg
+    }
+        
+    
+def segment_averagePhoneDuration(segment, config):
+    minAveragePhoneDuration = config["minAveragePhoneDuration"]
+    maxAveragePhoneDuration = config["maxAveragePhoneDuration"]
 
     nr = segment["nr"]
      
     duration = segment["end"]-segment["start"]
     nchars = len(segment["text"])
-    averageCharDuration = duration/nchars
-    if averageCharDuration < minAverageCharDuration:
-        msg = "Too short (segment %d): averageCharDuration: %.2f, minAverageCharDuration: %.2f" % (nr, averageCharDuration, minAverageCharDuration)
+    averagePhoneDuration = duration/nchars
+    if averagePhoneDuration < minAveragePhoneDuration:
+        msg = "Too short (segment %d): averagePhoneDuration: %.2f, minAveragePhoneDuration: %.2f" % (nr, averagePhoneDuration, minAveragePhoneDuration)
         segment["valid"] = False
-    elif averageCharDuration > maxAverageCharDuration:
-        msg = "Too long (segment %d): averageCharDuration: %.2f, maxAverageCharDuration: %.2f" % (nr, averageCharDuration, maxAverageCharDuration)
+    elif averagePhoneDuration > maxAveragePhoneDuration:
+        msg = "Too long (segment %d): averagePhoneDuration: %.2f, maxAveragePhoneDuration: %.2f" % (nr, averagePhoneDuration, maxAveragePhoneDuration)
         segment["valid"] = False
     else:
-        msg = "averageCharDuration (segment %d): %.2f" % (nr, averageCharDuration)
+        msg = "averagePhoneDuration (segment %d): %.2f" % (nr, averagePhoneDuration)
     segment["messages"].append(msg)
 
     return segment
@@ -322,3 +357,7 @@ def vad_collector(sample_rate, frame_duration_ms,
         
 #END FROM py-webrtcvad example.py
 
+if __name__ == "__main__":
+    soundfile = sys.argv[1]
+    textfile = sys.argv[2]
+    print(matchAudioAndTextLength(soundfile, textfile))

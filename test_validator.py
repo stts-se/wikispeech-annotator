@@ -74,7 +74,6 @@ def test_is_audio_data():
 #Test that audio contains speech
 def test_audio_file_contains_speech():
     params = {
-        #"audioInput": "test_data/shakespeare_part1_mono.wav",
         "audioInput": "test_data/shakespeare_part1.wav",
         "audioInputType": "FILE"
         }
@@ -108,6 +107,75 @@ def test_audio_file_does_not_contain_speech():
     
     debug(json.dumps(response.json(), indent=4))    
 
+#Test 4
+#Test that length of soundfile and text appears to match
+
+def test_short_audio_short_text():
+    params = {
+        "audioInput": "test_data/shakespeare_sent1_phrase1.wav",
+        "audioInputType": "FILE",
+        "text": "test_data/shakespeare_sent1_phrase1.txt",
+        "textInputType": "FILE"
+        }
+
+    response = client.post("/validate", json=params)
+    debug(response.json())
+    if response.status_code != 200:
+        print(response)
+        print(response.json())
+    assert response.status_code == 200
+    assert int(response.json()["score"]) == 1
+    debug(json.dumps(response.json(), indent=4))    
+
+def test_short_audio_long_text():
+    params = {
+        "audioInput": "test_data/shakespeare_sent1_phrase1.wav",
+        "audioInputType": "FILE",
+        "text": "test_data/shakespeare_part1.txt",
+        "textInputType": "FILE"
+        }
+
+    response = client.post("/validate", json=params)
+    if response.status_code != 200:
+        print(response)
+        print(response.json())
+    assert response.status_code == 200
+    assert response.json()["score"] != 1
+    debug(json.dumps(response.json(), indent=4))    
+
+def test_long_audio_long_text():
+    params = {
+        "audioInput": "test_data/shakespeare_part1.wav",
+        "audioInputType": "FILE",
+        "text": "test_data/shakespeare_part1.txt",
+        "textInputType": "FILE"
+        }
+
+    response = client.post("/validate", json=params)
+    debug(response.json())
+    if response.status_code != 200:
+        print(response)
+        print(response.json())
+    assert response.status_code == 200
+    assert int(response.json()["score"]) == 1
+    debug(json.dumps(response.json(), indent=4))    
+
+def test_long_audio_short_text():
+    params = {
+        "audioInput": "test_data/shakespeare_part1.wav",
+        "audioInputType": "FILE",
+        "text": "test_data/shakespeare_sent1_phrase1.txt",
+        "textInputType": "FILE"
+        }
+
+    response = client.post("/validate", json=params)
+    debug(response.json())
+    if response.status_code != 200:
+        print(response)
+        print(response.json())
+    assert response.status_code == 200
+    assert int(response.json()["score"]) != 1
+    debug(json.dumps(response.json(), indent=4))    
 
 
 verbose = False

@@ -418,16 +418,16 @@ def shiro_align_json(language, audiofile, textfile):
 ########## VALIDATE ########################
 
 @cliapp.command()
-def validate(audioinput: str, audioInputType: str = AudioInputType.FILE, jsonfile: str = None, language: str = None ):
-    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType)
+def validate(audioinput: str, audioInputType: str = AudioInputType.FILE, jsonfile: str = None, language: str = None, text: str = None, textInputType:str = TextInputType.FILE ):
+    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, text=text, textInputType=textInputType)
     result = validate(areq)
     typer.echo(json.dumps(result, indent=4))
 
 
 
 @app.get("/validate")
-def validate(audioInput: str, audioInputType: str = AudioInputType.FILE, jsonfile: str = None, language: str = None ):
-    areq = AnnotationRequest(audioInput=audioInput, audioInputType=audioInputType)
+def validate(audioInput: str, audioInputType: str = AudioInputType.FILE, jsonfile: str = None, language: str = None, text: str = None, textInputType:str = TextInputType.FILE ):
+    areq = AnnotationRequest(audioInput=audioInput, audioInputType=audioInputType, text=text, textInputType=textInputType)
     result = validate(areq)
     return result
 
@@ -443,13 +443,18 @@ def validate(areq: AnnotationRequest):
 
         #2) Audio should contain speech
         vals.append(validate_audio_contains_speech(areq))
+
+        #3) If there is text, the length of text and audio should match to some extent
+        #TODO only works for file input at the moment
+        if areq.text != None:
+            vals.append(validator.matchAudioAndTextLength(areq.audioInput, areq.text))
         
         score = getValScore(vals)
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"VALIDATE processing error: {e}")
         
     return {
-        "score": f"{score:.2f}",
+        "score": round(score,2),
         "validation": vals
     }
 
