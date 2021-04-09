@@ -52,7 +52,18 @@ Validate sound file
 python3 annotator.py validate test_data/shakespeare_part1.wav
 ```
 ```
+http get :4567/validate?audioInput=test_data/shakespeare_part1.wav
 http post :4567/validate audioInputType="FILE" audioInput=test_data/shakespeare_part1.wav
+```
+
+Validate sound file and text file
+
+```
+python3 annotator.py validate test_data/shakespeare_part1.wav --text test_data/shakespeare_part1.txt
+```
+```
+http get :4567/validate?audioInput=test_data/shakespeare_part1.wav&text=test_data/shakespeare_part1.txt
+http post :4567/validate audioInputType="FILE" audioInput=test_data/shakespeare_part1.wav textInputType="FILE" text=test_data/shakespeare_part1.txt
 ```
 
 Example:
