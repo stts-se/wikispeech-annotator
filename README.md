@@ -10,6 +10,13 @@ python3 -m pip install numpy
 python3 -m pip install -r requirements.txt 
 ```
 
+Run in terminal:
+
+```
+python3 annotator.py
+```
+
+
 Run test server:
 ```
 python3 -m uvicorn --reload --port 4567 annotator:app
