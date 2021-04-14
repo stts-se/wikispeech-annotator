@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, os, json
+import sys, os, json, re
 import typer
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.templating import Jinja2Templates
@@ -24,7 +24,7 @@ import fleep
 
 import validator
 
-
+import requests
 
 
 
@@ -154,6 +154,61 @@ class AnnotationRequest(BaseModel):
 @app.get("/")
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+    #return render_template("index.html")
+
+
+
+####### ANNOTATE ########
+# Input json (or text), see what's there and try to add missing bits
+# Validate result and return json
+
+@cliapp.command()
+def annotate(audioinput: str, textinput: str, language: str = "sv-SE", audioInputType: str = AudioInputType.FILE, textInputType: str = TextInputType.FILE, returnType: str = ReturnType.JSON):
+    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, text=textinput, textInputType=textInputType, returnType=returnType)
+    result = annotate(None, areq)
+    if returnType == ReturnType.JSON:
+        typer.echo(json.dumps(result, indent=4))
+    else:
+        print(result.body.decode())
+
+@app.get("/annotate")
+def annotate(request: Request, audioinput: str, textinput: str, language: str = "sv-SE", audioInputType: str = AudioInputType.FILE, textInputType: str = TextInputType.FILE, returnType: str = ReturnType.JSON):
+    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, text=textinput, textInputType=textInputType, returnType=returnType)
+    result = annotate(request, areq)
+    if returnType == ReturnType.JSON:
+        typer.echo(json.dumps(result, indent=4))
+    else:
+        print(result.body.decode())
+    
+@app.post("/annotate")
+def annotate(request: Request, areq: AnnotationRequest):
+    if type(areq.text) == str:
+        result = align(request, areq)
+        for item in result["alignment"]:
+            sentence = item["text"]
+            item["items"] = transcribe(sentence)
+    return result
+
+
+def transcribe(sentence: str):
+    res = requests.get(f"http://localhost:8000?lang=en&text={sentence}")
+    jsonwords = []
+    #print(res.json())
+    for item in res.json():
+        #print(f"word: {item}")
+        syllables = item.split(" . ")
+        jsonsyllables = []
+        jsonword = {"text":item, "items":jsonsyllables}
+        jsonwords.append(jsonword)
+        for syllable in syllables:
+            syllable = re.sub("\s*[0-9]$", "", syllable)
+            jsonphns = syllable.strip().split(" ")
+            jsonsyll = {"text":syllable, "items":jsonphns}
+            jsonsyllables.append(jsonsyll)
+    return jsonwords
+
+    
+    #return [{"text":"hej", "items":[{"text":"h e j", "items":[{"text":"h"},{"text":"e"},{"text":"j"}]}]},{"text":"apa", "items":[{"text":"a", "items":[{"text":"a"}]}, {"text":"p a", "items":[{"text":"p"}, {"text":"a"}]}]}]
 
 
 ######## VAD ##########
@@ -288,6 +343,7 @@ def align(request: Request, areq: AnnotationRequest):
         elif  areq.alignMethod == AlignMethod.JSON_SHIRO:
             alignment = shiro_align_json(areq.language, audiofile, textfile)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=422, detail=f"ALIGN processing error: {e}")
 
     
