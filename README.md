@@ -108,3 +108,7 @@ http post :4567/align audioInputType="FILE" audioInput=test_data/shakespeare_sen
 
 
 output is json with text+word time points and phonemes+time points
+
+---
+
+_This work was supported by the Swedish Post and Telecom Authority (PTS) through the grant "Talresursinsamlaren – För ett tillgängligare Wikipedia genom Wikispeech" (2019–2021)._
