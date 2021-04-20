@@ -243,7 +243,7 @@ def vad(request: Request, areq: AnnotationRequest):
         (_, tmpaudio) = mkstemp(suffix=".wav")
         #HB TODO remove system calls
         cmd = f"sox {audiofile} -c 1 -r 16000 {tmpaudio}"
-        print(cmd)
+        #print(cmd) ## print to stderr if needed, not stdout!!
         os.system(cmd)
         audiofile = tmpaudio
     else:
