@@ -224,8 +224,8 @@ def vad(audioinput: str, audioInputType: str = AudioInputType.FILE, returnType: 
 
 
 @app.get("/vad")
-def vad(request: Request, audioInput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON):
-    areq = AnnotationRequest(audioInput=audioInput, audioInputType=audioInputType, returnType=returnType)
+def vad(request: Request, audioInput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON, audioInputFormat: str = AudioInputFormat.PCM):
+    areq = AnnotationRequest(audioInput=audioInput, audioInputType=audioInputType, returnType=returnType, audioInputFormat=audioInputFormat)
     result = vad(request, areq)
     return result
 
