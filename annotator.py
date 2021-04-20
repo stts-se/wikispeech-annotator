@@ -214,8 +214,8 @@ def transcribe(sentence: str):
 ######## VAD ##########
 
 @cliapp.command()
-def vad(audioinput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON):
-    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, returnType=returnType)
+def vad(audioinput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON, audioInputFormat: str = AudioInputFormat.PCM):
+    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, returnType=returnType, audioInputFormat=audioInputFormat)
     result = vad(None, areq)
     if returnType == ReturnType.JSON:
         typer.echo(json.dumps(result, indent=4))
