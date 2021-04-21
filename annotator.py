@@ -214,8 +214,8 @@ def transcribe(sentence: str):
 ######## VAD ##########
 
 @cliapp.command()
-def vad(audioinput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON):
-    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, returnType=returnType)
+def vad(audioinput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON, audioInputFormat: str = AudioInputFormat.PCM):
+    areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, returnType=returnType, audioInputFormat=audioInputFormat)
     result = vad(None, areq)
     if returnType == ReturnType.JSON:
         typer.echo(json.dumps(result, indent=4))
@@ -224,8 +224,8 @@ def vad(audioinput: str, audioInputType: str = AudioInputType.FILE, returnType: 
 
 
 @app.get("/vad")
-def vad(request: Request, audioInput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON):
-    areq = AnnotationRequest(audioInput=audioInput, audioInputType=audioInputType, returnType=returnType)
+def vad(request: Request, audioInput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON, audioInputFormat: str = AudioInputFormat.PCM):
+    areq = AnnotationRequest(audioInput=audioInput, audioInputType=audioInputType, returnType=returnType, audioInputFormat=audioInputFormat)
     result = vad(request, areq)
     return result
 
@@ -243,7 +243,7 @@ def vad(request: Request, areq: AnnotationRequest):
         (_, tmpaudio) = mkstemp(suffix=".wav")
         #HB TODO remove system calls
         cmd = f"sox {audiofile} -c 1 -r 16000 {tmpaudio}"
-        print(cmd)
+        print(cmd, file=sys.stderr) 
         os.system(cmd)
         audiofile = tmpaudio
     else:
