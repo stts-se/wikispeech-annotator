@@ -10,4 +10,4 @@ fastapi==0.67.0
 typer==0.3.2
 aiofiles
 mutagen
-click==8.0.1
+click==8.1.2
