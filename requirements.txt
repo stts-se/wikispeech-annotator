@@ -6,7 +6,7 @@ numpy
 uvicorn
 jinja2
 aeneas==1.7.3.0
-fastapi==0.67.0
+fastapi==0.76.0
 typer==0.3.2
 aiofiles
 mutagen
