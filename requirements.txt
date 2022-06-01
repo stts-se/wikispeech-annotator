@@ -1,7 +1,7 @@
 fleep==1.0.1
 pydantic==1.8.2
 webrtcvad==2.0.10
-lxml==4.6.3
+lxml==4.9.0
 numpy
 uvicorn
 jinja2
