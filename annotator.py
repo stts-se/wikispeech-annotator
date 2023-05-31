@@ -214,8 +214,9 @@ def transcribe(sentence: str):
 ######## VAD ##########
 
 @cliapp.command()
-def vad(audioinput: str, audioInputType: str = AudioInputType.FILE, returnType: str = ReturnType.JSON, audioInputFormat: str = AudioInputFormat.PCM):
+def vad(audioinput: str, audioInputType: str = "FILE", returnType: str = "JSON", audioInputFormat: str = "PCM"):
     areq = AnnotationRequest(audioInput=audioinput, audioInputType=audioInputType, returnType=returnType, audioInputFormat=audioInputFormat)
+    print(areq)
     result = vad(None, areq)
     if returnType == ReturnType.JSON:
         typer.echo(json.dumps(result, indent=4))
@@ -316,6 +317,7 @@ def align(request: Request, audioInput: str, textInput: str, language: str = "sv
 @app.post("/align")
 def align(request: Request, areq: AnnotationRequest):
 
+    
     if areq.audioInputType == "FILE":
         audiofile = areq.audioInput
     elif areq.audioInputType == "BASE64":
@@ -395,6 +397,7 @@ def aeneas_align(language, audiofile, textfile):
 
 shiro_models = {
     "en-GB": "aligner_models/nnc_en",
+    "ga-CO": "aligner_models/snc_ga",
     "sv-SE": "aligner_models/hb_sv"
 }
     
