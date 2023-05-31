@@ -124,6 +124,7 @@ class AudioInputFormat(str, Enum):
     PCM = "PCM"
     MP3 = "MP3"
     OGG = "OGG"
+    OPUS = "OPUS"
 
 class ReturnType(str, Enum):
     JSON = "JSON"
@@ -243,13 +244,21 @@ def vad(request: Request, areq: AnnotationRequest):
         audiofile = areq.audioInput
         (_, tmpaudio) = mkstemp(suffix=".wav")
         #HB TODO remove system calls
-        cmd = f"sox {audiofile} -c 1 -r 16000 {tmpaudio}"
+        cmd = f"ffmpeg -y -i {audiofile} {tmpaudio}"
+        #cmd = f"sox {audiofile} -c 1 -r 16000 {tmpaudio}"
         print(cmd, file=sys.stderr) 
         os.system(cmd)
         audiofile = tmpaudio
     else:
+        audiofile = areq.audioInput
+        (_, tmpaudio) = mkstemp(suffix=".wav")
+        cmd = f"ffmpeg -y -i {audiofile} {tmpaudio}"
+        #cmd = f"sox {audiofile} -c 1 -r 16000 {tmpaudio}"
+        print(cmd, file=sys.stderr) 
+        os.system(cmd)
+        audiofile = tmpaudio
         #TODO: URL should be supported (by requests) or removed
-        raise HTTPException(status_code=422, detail=f"audioInputType {areq.audioInputType} not yet supported")
+        #raise HTTPException(status_code=422, detail=f"audioInputType {areq.audioInputType} not yet supported")
 
     try:
         vad_timepoints = validator.getVadTimepoints(audiofile)
