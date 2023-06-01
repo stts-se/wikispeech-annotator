@@ -1,5 +1,5 @@
 fleep==1.0.1
-pydantic==1.10.6
+pydantic==1.10.8
 webrtcvad==2.0.10
 lxml==4.9.2
 numpy
